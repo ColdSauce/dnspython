@@ -1,6 +1,7 @@
 # dnspython
 
-[![Build Status](https://travis-ci.org/rthalley/dnspython.svg?branch=master)](https://travis-ci.org/rthalley/dnspython)
+## Warning!
+This is a custom fork of the DNSPython library that removes the constraints set up for individual DNS query packets such as label too long, etc. If you're doing normal stuff with DNS, you'll probably want to have these! Do not use our package! 
 
 ## INTRODUCTION
 

@@ -143,22 +143,12 @@ class IDNA2003Codec(IDNACodec):
 
         if label == '':
             return b''
-        try:
-            return encodings.idna.ToASCII(label)
-        except UnicodeError:
-            raise LabelTooLong
+        # No need to encode
+        return label
 
     def decode(self, label):
         """Decode *label*."""
-        if not self.strict_decode:
-            return super(IDNA2003Codec, self).decode(label)
-        if label == b'':
-            return u''
-        try:
-            return _escapify(encodings.idna.ToUnicode(label), True)
-        except Exception as e:
-            raise IDNAException(idna_exception=e)
-
+        return label.encode('utf-8')
 
 class IDNA2008Codec(IDNACodec):
     """IDNA 2008 encoder/decoder.
@@ -271,33 +261,16 @@ def _escapify(label, unicode_mode=False):
     return text
 
 def _validate_labels(labels):
-    """Check for empty labels in the middle of a label sequence,
-    labels that are too long, and for too many labels.
+    """
+    Check if labels are too long. Doesn't perform any other checks that a regular DNS application might need. The other errors are only suggestions -- the protocol doesn't define them as explicilty required.
 
     Raises ``dns.name.NameTooLong`` if the name as a whole is too long.
 
-    Raises ``dns.name.EmptyLabel`` if a label is empty (i.e. the root
-    label) and appears in a position other than the end of the label
-    sequence
-
     """
 
-    l = len(labels)
-    total = 0
-    i = -1
-    j = 0
-    for label in labels:
-        ll = len(label)
-        total += ll + 1
-        if ll > 63:
-            raise LabelTooLong
-        if i < 0 and label == b'':
-            i = j
-        j += 1
+    
     if total > 255:
         raise NameTooLong
-    if i >= 0 and i != l - 1:
-        raise EmptyLabel
 
 
 def _maybe_convert_to_binary(label):
